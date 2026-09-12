@@ -1,39 +1,54 @@
 # alignx
 
-**Smith–Waterman local sequence alignment** — a compact computational-biology / algorithms portfolio piece with a **C++17** engine, a **Java** reference implementation (same CLI/output contract), and **Python** tests that assert bit-for-bit agreement on fixtures.
+**Smith–Waterman local sequence alignment** — C++17 engine, Java reference (same CLI/output contract), and Python tests that assert bit-for-bit agreement on fixtures.
+
+[![CI](https://github.com/SK090347/alignx/actions/workflows/ci.yml/badge.svg)](https://github.com/SK090347/alignx/actions/workflows/ci.yml)
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
 
 > Author: **Sumit Kumar Ta (SK090347)** · Dual license **MIT OR Apache-2.0**
 
 ---
 
-## Why Smith–Waterman?
+## Mathematics / Formulation
 
-Global alignment (Needleman–Wunsch) forces end-to-end paths. **Local** alignment finds the highest-scoring contiguous pair of subsequences — the right model for shared domains, motifs, and noisy flanks. Classic dynamic programming; time and space **O(mn)** for sequences of lengths *m* and *n*.
+Local alignment finds the highest-scoring contiguous pair of subsequences. With substitution score $s(a_i,b_j)$ and linear gap penalty $g > 0$:
 
-### DP recurrence
-
-Let \(s(a_i,b_j)\) be the substitution score (match / mismatch). With a **linear** gap penalty \(g > 0\):
-
-\[
+$$
 H_{i,j} = \max\begin{cases}
 0 \\
 H_{i-1,j-1} + s(a_i,b_j) \\
 H_{i-1,j} - g \\
 H_{i,j-1} - g
 \end{cases}
-\]
+$$
 
-With **affine** gaps (Gotoh-style open \(o\) and extend \(e\)):
+Affine gaps (Gotoh) with open $o$ and extend $e$:
 
-\[
+$$
 \begin{aligned}
 E_{i,j} &= \max(H_{i,j-1} - o - e,\ E_{i,j-1} - e) \\
 F_{i,j} &= \max(H_{i-1,j} - o - e,\ F_{i-1,j} - e) \\
 H_{i,j} &= \max(0,\ H_{i-1,j-1} + s(a_i,b_j),\ E_{i,j},\ F_{i,j})
 \end{aligned}
-\]
+$$
 
-Traceback from \(\arg\max H\) until a zero cell; complexity remains **O(mn)** time and **O(mn)** memory (matrices + pointers).
+Traceback from $\arg\max H$ until a zero cell. What is computed: **optimal local alignment score** plus the aligned substrings $(Q,S)$ and their endpoints.
+
+### Complexity
+
+| Mode | Time | Space | Notes |
+|------|------|-------|-------|
+| Linear gap | $O(mn)$ | $O(mn)$ | Single matrix $H$ + traceback |
+| Affine gap | $O(mn)$ | $O(mn)$ | Matrices $H,E,F$ + pointers |
+| Hirschberg (not shipped) | $O(mn)$ | $O(\min(m,n))$ | Linear-space upgrade path |
+
+**Why this formula?** The $\max(0,\ldots)$ clamp is what makes Smith–Waterman *local* — global Needleman–Wunsch cannot stop early. Affine gaps match biology’s open-vs-extend cost asymmetry.
+
+---
+
+## Why Smith–Waterman?
+
+Global alignment forces end-to-end paths. **Local** alignment is the right model for shared domains, motifs, and noisy flanks — classic dynamic programming for sequences of lengths $m$ and $n$.
 
 ```mermaid
 flowchart LR

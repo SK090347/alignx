@@ -1,0 +1,26 @@
+# Build
+cpp/build/
+build/
+java/out/
+java/target/
+*.o
+*.a
+*.class
+*.jar
+
+# Python
+.venv/
+venv/
+alignx-venv/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+dist/
+.eggs/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store

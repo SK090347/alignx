@@ -1,23 +1,112 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>alignx</title>
+<html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>alignx — Smith–Waterman lab</title>
+<meta name="description" content="Interactive Smith–Waterman: DNA inputs, score matrix heatmap, traceback highlight."/>
 <style>
-:root{--bg:#0d1117;--card:#161b22;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff}
-body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,sans-serif}
-main{max-width:720px;margin:0 auto;padding:48px 20px}
-h1{margin:0 0 8px;font-size:2rem}.sub{color:var(--muted);margin-bottom:24px}
-a.btn{display:inline-block;margin:6px 8px 6px 0;padding:10px 14px;border-radius:10px;text-decoration:none;border:1px solid #30363d;background:var(--card);color:var(--text)}
-a.primary{background:#238636;border-color:#238636;color:#fff;font-weight:600}
-code{background:#21262d;padding:2px 6px;border-radius:6px}
+:root{--bg:#0d1117;--card:#161b22;--panel:#0f141c;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--ok:#3fb950;--warn:#d29922;--bad:#f85149;--border:#30363d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.5}
+main{max-width:980px;margin:0 auto;padding:28px 16px 64px}
+.banner{background:linear-gradient(120deg,#161b22,#0d1117 60%,#122033);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:18px;color:var(--muted);font-size:.92rem}
+.banner strong{color:var(--text)}
+h1{margin:0 0 6px;font-size:clamp(1.5rem,3vw,2rem);letter-spacing:-.02em}
+.sub{color:var(--muted);margin:0 0 18px;max-width:70ch}
+a{color:var(--accent)} .row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;align-items:end}
+button{appearance:none;border:1px solid var(--border);background:#21262d;color:var(--text);border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer}
+button.primary{background:#238636;border-color:#238636;color:#fff}button:hover{filter:brightness(1.08)}
+input,textarea{background:var(--panel);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font:inherit;width:100%}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin:12px 0}
+.muted{color:var(--muted)} .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
+.field{flex:1;min-width:110px}
+.sst{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;margin:6px 0}
+.mem{min-height:60px;background:var(--panel);border:1px dashed #58a6ff66;border-radius:8px;padding:10px}
+.log{max-height:180px;overflow:auto;background:#010409;border:1px solid var(--border);border-radius:8px;padding:10px;white-space:pre-wrap}
+
+#heat{border-collapse:collapse;font-family:ui-monospace,monospace;font-size:11px;margin-top:8px}
+#heat th,#heat td{width:28px;height:28px;text-align:center;border:1px solid #21262d}
+#heat td.path{outline:2px solid #58a6ff;outline-offset:-2px;font-weight:700}
+#heat td.max{box-shadow:inset 0 0 0 2px #f0c14b}
+.aln{font-family:ui-monospace,monospace;font-size:14px;letter-spacing:.08em;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px;white-space:pre}
 </style></head><body><main>
-<h1>alignx</h1>
-<p class="sub">Smith–Waterman local alignment — C++ / Java / Python.</p>
-<p>This repo is library / systems code — clone and run locally for the full experience.</p>
-<pre style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px;overflow:auto"><code>git clone https://github.com/SK090347/alignx.git
-cd alignx
-npm install && npm test</code></pre>
-<p style="margin-top:22px">
-  <a class="btn primary" href="https://github.com/SK090347/alignx">Open on GitHub</a>
-  <a class="btn" href="https://sk090347.github.io/portfolio/">Back to portfolio</a>
-</p>
-</main></body></html>
+<div class="banner"><strong>What is this?</strong> Smith–Waterman local alignment. Edit two DNA strings, Align — the DP score matrix fills as a heatmap, then traceback (blue) recovers the best local match from the max cell.</div>
+<h1>alignx <span style="color:var(--accent)">· Smith–Waterman</span></h1>
+<p class="sub">Local pairwise alignment — same math as the C++/Java engines in the <a href="https://github.com/SK090347/alignx">repo</a>. Match +2, mismatch −1, gap −2 (linear).</p>
+<div class="card">
+  <div class="grid2">
+    <div><label>Sequence A</label><input id="a" value="ACACACTA" class="mono"/></div>
+    <div><label>Sequence B</label><input id="b" value="AGCACACA" class="mono"/></div>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <button class="primary" id="go">Align</button>
+    <button id="ex">Example: longer</button>
+  </div>
+</div>
+<div class="grid2">
+  <div class="card"><div class="muted" style="font-size:.75rem;letter-spacing:.06em;text-transform:uppercase">Alignment</div><div class="aln" id="aln">—</div>
+  <p class="muted" style="font-size:.85rem;margin-top:8px" id="meta"></p></div>
+  <div class="card"><div class="muted" style="font-size:.75rem;letter-spacing:.06em;text-transform:uppercase">How to read</div>
+  <p class="muted" style="font-size:.9rem;margin:0">H[i,j] = max(0, diag+sub, up−gap, left−gap). The clamp to 0 makes it <em>local</em>. Bright cells = high score. Blue outline = traceback path from the global max back to a 0.</p></div>
+</div>
+<div class="card" style="overflow:auto"><div class="muted" style="font-size:.75rem;letter-spacing:.06em;text-transform:uppercase">Score matrix heatmap</div><div id="wrap"></div></div>
+<p class="muted" style="font-size:.85rem"><a href="https://sk090347.github.io/portfolio/">← portfolio</a></p>
+<script>
+var MATCH=2, MIS=-1, GAP=2;
+function sw(A,B){
+  var m=A.length,n=B.length;
+  var H=[], ptr=[], i, j;
+  for(i=0;i<=m;i++){H[i]=[];ptr[i]=[];for(j=0;j<=n;j++){H[i][j]=0;ptr[i][j]=0;}}
+  var best=0,bi=0,bj=0;
+  for(i=1;i<=m;i++) for(j=1;j<=n;j++){
+    var sub=A[i-1]===B[j-1]?MATCH:MIS;
+    var d=H[i-1][j-1]+sub, u=H[i-1][j]-GAP, l=H[i][j-1]-GAP;
+    var v=0,p=0;
+    if(d>=v){v=d;p=1;} if(u>v){v=u;p=2;} if(l>v){v=l;p=3;}
+    H[i][j]=v; ptr[i][j]=p;
+    if(v>best){best=v;bi=i;bj=j;}
+  }
+  i=bi;j=bj; var a='',b='', path={};
+  while(i>0&&j>0&&H[i][j]>0){
+    path[i+','+j]=1;
+    var p=ptr[i][j];
+    if(p===1){a=A[i-1]+a;b=B[j-1]+b;i--;j--;}
+    else if(p===2){a=A[i-1]+a;b='-'+b;i--;}
+    else if(p===3){a='-'+a;b=B[j-1]+b;j--;}
+    else break;
+  }
+  return {H:H,best:best,bi:bi,bj:bj,a:a,b:b,path:path,A:A,B:B};
+}
+function color(v,max){
+  if(max<=0||v<=0) return '#0d1117';
+  var t=v/max; return 'rgb('+Math.round(13+t*70)+','+Math.round(17+t*140)+','+Math.round(23+t*200)+')';
+}
+function run(){
+  var A=document.getElementById('a').value.trim().toUpperCase().replace(/[^ACGT]/g,'');
+  var B=document.getElementById('b').value.trim().toUpperCase().replace(/[^ACGT]/g,'');
+  if(!A||!B){alert('Need DNA A/C/G/T');return;}
+  if(A.length>24||B.length>24){alert('Keep ≤24 bases for a readable heatmap');return;}
+  var r=sw(A,B);
+  document.getElementById('aln').textContent='A  '+r.a+'\nB  '+r.b;
+  document.getElementById('meta').textContent='Best local score '+r.best+' at cell ('+r.bi+','+r.bj+'). Match '+MATCH+', mismatch '+MIS+', gap −'+GAP+'.';
+  var html='<table id="heat"><tr><th></th><th></th>';
+  for(var c=0;c<B.length;c++) html+='<th>'+B[c]+'</th>';
+  html+='</tr><tr><th></th><td>0</td>';
+  for(c=0;c<B.length;c++) html+='<td>0</td>';
+  html+='</tr>';
+  for(var i=1;i<=A.length;i++){
+    html+='<tr><th>'+A[i-1]+'</th><td>0</td>';
+    for(var j=1;j<=B.length;j++){
+      var v=r.H[i][j];
+      var cls=(r.path[i+','+j]?' path':'')+(i===r.bi&&j===r.bj?' max':'');
+      html+='<td class="'+cls.trim()+'" style="background:'+color(v,r.best)+'" title="H['+i+','+j+']='+v+'">'+v+'</td>';
+    }
+    html+='</tr>';
+  }
+  html+='</table>';
+  document.getElementById('wrap').innerHTML=html;
+}
+document.getElementById('go').onclick=run;
+document.getElementById('ex').onclick=function(){document.getElementById('a').value='GGTTGACTA';document.getElementById('b').value='TGTTACGG';run();};
+run();
+</script></main></body></html>

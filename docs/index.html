@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>alignx — Smith–Waterman local alignment</title>
+  <meta name="description" content="Smith–Waterman local alignment with a C++17 engine, a Java reference that shares the same CLI/output contract, and Python tests that assert they agree on fixtur" />
+  <style>
+:root {
+  --bg: #0b0f14;
+  --panel: #121821;
+  --border: #1e2936;
+  --text: #e6edf3;
+  --muted: #8b9bb0;
+  --accent: #5b9cff;
+  --accent2: #7c5cff;
+  --good: #3dd68c;
+  --warn: #f5a524;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--sans); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 920px; margin: 0 auto; padding: 48px 24px 80px; }
+.hero {
+  background: linear-gradient(145deg, #121a26 0%, #0e1520 55%, #101828 100%);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 36px 32px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute; inset: -40% -20% auto auto; width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(91,156,255,.22), transparent 70%);
+  pointer-events: none;
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 14px;
+}
+.badge span { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 12px var(--good); }
+h1 { margin: 0 0 12px; font-size: clamp(1.8rem, 4vw, 2.4rem); letter-spacing: -.02em; }
+.pitch { color: var(--muted); font-size: 1.05rem; line-height: 1.65; max-width: 62ch; margin: 0 0 22px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border); background: #162033; color: var(--text);
+  padding: 10px 14px; border-radius: 10px; font-weight: 600; font-size: .95rem;
+}
+.btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); border-color: transparent; color: #fff; }
+.btn:hover { filter: brightness(1.08); text-decoration: none; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 28px; }
+.card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 18px 16px;
+}
+.card h3 { margin: 0 0 8px; font-size: 1rem; }
+.card p { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.55; }
+pre, code { font-family: var(--mono); }
+pre {
+  background: #0a1018; border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px; overflow: auto; color: #d7e3f4; font-size: .88rem; line-height: 1.5;
+}
+.section { margin-top: 34px; }
+.section h2 { font-size: 1.15rem; margin: 0 0 12px; }
+.footer { margin-top: 40px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--border); padding-top: 18px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="badge"><span></span> SK090347 · open source</div>
+      <h1>alignx</h1>
+      <p class="pitch">Smith–Waterman local alignment with a C++17 engine, a Java reference that shares the same CLI/output contract, and Python tests that assert they agree on fixtures — including affine (Gotoh) gaps.</p>
+      <div class="actions">
+        <a class="btn primary" href="https://github.com/SK090347/alignx" target="_blank" rel="noopener">View on GitHub</a>
+        <a class="btn" href="https://github.com/SK090347/alignx#readme" target="_blank" rel="noopener">README</a>
+      </div>
+    </section>
+    <div class="grid">
+      <div class="card"><h3>C++17 + Java</h3><p>Two engines, one machine-readable SCORE=/Q=/S= contract so cross-language tests can bite.</p></div>
+      <div class="card"><h3>Affine gaps</h3><p>Gotoh open/extend matrices for biologically plausible gap costing.</p></div>
+      <div class="card"><h3>Fixture harness</h3><p>Python pytest compares engines on shared FASTA fixtures.</p></div>
+    </div>
+    <section class="section">
+      <h2>How to run</h2>
+      <pre>make cpp && make java
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e "./python[dev]"
+pytest python/tests -v
+make demo
+
+./cpp/build/alignx --affine --match 2 --mismatch -1 \
+  --gap-open 2 --gap-extend 1 \
+  fixtures/query.fa fixtures/subject.fa</pre>
+    </section>
+    <p class="footer">MIT OR Apache-2.0 · <a href="https://github.com/SK090347">Sumit Kumar Ta</a> · Adamas University</p>
+  </div>
+</body>
+</html>

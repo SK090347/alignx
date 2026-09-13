@@ -1,5 +1,7 @@
 # alignx
 
+**Live demo:** https://sk090347.github.io/alignx/
+
 Smith–Waterman local alignment with a C++17 engine, a Java reference that shares the same CLI/output contract, and Python tests that assert they agree on fixtures.
 
 [![CI](https://github.com/SK090347/alignx/actions/workflows/ci.yml/badge.svg)](https://github.com/SK090347/alignx/actions/workflows/ci.yml)
